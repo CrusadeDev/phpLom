@@ -45,7 +45,6 @@ class ClassLoader
     /**
      * @param \Iterator<SplFileInfo> $files
      * @throws \ReflectionException
-     * @throws \JsonException
      */
     public function parseAllFiles(\Iterator $files): void
     {
