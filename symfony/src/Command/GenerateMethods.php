@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Config\Config;
 use App\Override\ClassLoader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,6 +20,7 @@ class GenerateMethods extends Command
 
     /**
      * @throws \ReflectionException
+     * @throws \JsonException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -28,10 +30,9 @@ class GenerateMethods extends Command
 
         $files = $finder->files()->in($path)->depth('>0');
 
+        $classLoader = new ClassLoader(new Config('/var/www/symfony/var/override'));
 
-        foreach ($files as $file) {
-            ClassLoader::parse($file);
-        }
+        $classLoader->parseAllFiles($files->getIterator());
 
         return Command::SUCCESS;
     }

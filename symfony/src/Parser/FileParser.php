@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Parser;
 
+use App\Config\Config;
 use App\Factory\GetterFactory;
+use App\File\OverrideFileService;
 use App\Nodes\Annotation;
+use App\ValueObject\FileContent;
+use App\ValueObject\FileName;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\SplFileInfo;
 
 class FileParser
@@ -20,10 +23,11 @@ class FileParser
     private Parser $parser;
     private GetterFactory $builder;
 
-    public function __construct()
+    public function __construct(Config $config)
     {
         $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
         $this->builder = new GetterFactory();
+        $this->overrideFileService = new OverrideFileService($config);
     }
 
     public function parse(SplFileInfo $filePath, Collection $annotations): ?string
@@ -43,7 +47,7 @@ class FileParser
 
         $prettyPrinter = new Standard;
         $code = $prettyPrinter->prettyPrintFile($ast->all());
-        (new Filesystem())->dumpFile($resultFile, $code);
+        $this->overrideFileService->save(FileName::fromString($filePath->getFilename()), new FileContent($code));
 
         return $resultFile;
     }

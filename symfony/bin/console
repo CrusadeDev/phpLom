@@ -1,7 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+use App\Config\Config;
 use App\Kernel;
+use App\Override\ClassLoader;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 
 if (!is_file(dirname(__DIR__).'/vendor/autoload_runtime.php')) {
@@ -10,7 +12,8 @@ if (!is_file(dirname(__DIR__).'/vendor/autoload_runtime.php')) {
 
 require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 
-\App\Override\ClassLoader::load();
+$classLoader = new ClassLoader(new Config('/var/www/symfony/var/override'));
+$classLoader->load();
 
 return function (array $context) {
     $kernel = new Kernel($context['APP_ENV'], (bool)$context['APP_DEBUG']);
