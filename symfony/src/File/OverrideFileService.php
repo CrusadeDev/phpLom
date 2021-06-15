@@ -29,6 +29,12 @@ class OverrideFileService
         $this->fileSystem->dumpFile((string)$this->getFilePath($name), $content);
     }
 
+    public function addDoc(string $file, FileContent $content): void
+    {
+        $this->fileSystem->dumpFile($file, $content);
+
+    }
+
     private function getFilePath(FileName $name): Path
     {
         return $this->fileBuilder->buildFileName($this->config->getCachePath(), $name);

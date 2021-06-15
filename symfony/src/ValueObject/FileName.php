@@ -18,6 +18,11 @@ class FileName
         return new self('overrideCache.json');
     }
 
+    public static function checkedFilesCache(): self
+    {
+        return new self('checked.json');
+    }
+
     public static function fromString(string $fileName): self
     {
         return new self($fileName);

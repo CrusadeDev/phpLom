@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Parser;
 
+use App\Builder\AnnotationMethodBuilder;
 use App\Config\Config;
-use App\Factory\GetterFactory;
 use App\File\OverrideFileService;
 use App\Nodes\Annotation;
+use App\Nodes\Getter;
+use App\Nodes\Setter;
 use App\ValueObject\FileContent;
 use App\ValueObject\FileName;
 use Illuminate\Support\Collection;
+use PhpParser\Comment\Doc;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Parser;
@@ -18,21 +21,27 @@ use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
 use Symfony\Component\Finder\SplFileInfo;
 
+/**
+ * @method int dead(string)
+ */
 class FileParser
 {
     private Parser $parser;
-    private GetterFactory $builder;
+    private AnnotationMethodBuilder $builder;
+    private OverrideFileService $overrideFileService;
+    private Config $config;
 
     public function __construct(Config $config)
     {
+        $this->config = $config;
         $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
-        $this->builder = new GetterFactory();
+        $this->builder = new AnnotationMethodBuilder();
         $this->overrideFileService = new OverrideFileService($config);
     }
 
     public function parse(SplFileInfo $filePath, Collection $annotations): ?string
     {
-        $resultFile = "/var/www/symfony/var/Override/{$filePath->getFilename()}";
+        $resultFile = $this->config->getCachePath().'/'.$filePath->getFilename();
 
         $code = file_get_contents($filePath->getPathname());
         $ast = new Collection($this->parser->parse($code));
@@ -43,11 +52,50 @@ class FileParser
             return null;
         }
 
-        $annotations->each(fn(Annotation $annotation) => $class->stmts[] = $this->builder->build($annotation));
+        $generated = new Collection([]);
+
+        $annotations->each(
+            function (Collection $annotation) use ($class, &$generated) {
+                $annotation
+                    ->transform(
+                        function (Annotation $ann) use (&$generated) {
+                            $stmt = $this->builder->buildForAnnotation($ann);
+
+                            $generated->add(['stmt' => $stmt, 'ann' => $ann]);
+
+                            return $stmt;
+                        }
+                    )
+                    ->tap(fn(Collection $collection) => $generated = $collection)
+                    ->each(fn(Stmt $stmt) => $class->stmts[] = $stmt);
+            }
+        );
+
+        $doc = $generated->transform(fn(array $stmt) => $this->getMethodDocDoc($stmt));
+
+        $s = "/** \n";
+        $doc->each(
+            function (string $d) use (&$s) {
+                return $s .= $d;
+            }
+        );
+        $s .= '*/';
+        $doc = new Doc($s);
 
         $prettyPrinter = new Standard;
-        $code = $prettyPrinter->prettyPrintFile($ast->all());
-        $this->overrideFileService->save(FileName::fromString($filePath->getFilename()), new FileContent($code));
+        $code1 = $prettyPrinter->prettyPrintFile($ast->all());
+        $this->overrideFileService->save(FileName::fromString($filePath->getFilename()), new FileContent($code1));
+
+        $ast2 = new Collection((new ParserFactory)->create(ParserFactory::PREFER_PHP7)->parse($code));
+        $namespace = $this->findNamespace($ast2);
+        $class = $this->findClasses($namespace);
+
+        $class->setDocComment($doc);
+
+        $this->overrideFileService->addDoc(
+            $filePath->getPathname(),
+            new FileContent($prettyPrinter->prettyPrintFile($ast2->all()))
+        );
 
         return $resultFile;
     }
@@ -89,5 +137,23 @@ class FileParser
         $namespaceString = $namespace->name->toCodeString();
 
         return "$namespaceString\\$className";
+    }
+
+    private function getMethodDocDoc(array $stmt): string
+    {
+        $ann = $stmt['ann'];
+
+        $type = $stmt['ann']->getPropertyType();
+        $name = $stmt['stmt']->name->toString();
+
+        if ($ann->getAnnotation() instanceof Setter) {
+            return " * @method void $name($type \${$ann->getPropertyName()})\n  ";
+        }
+
+        if ($ann->getAnnotation() instanceof Getter) {
+            return " * @method $type $name()\n  ";
+        }
+
+        return '';
     }
 }

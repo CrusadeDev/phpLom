@@ -8,6 +8,7 @@ use App\Nodes\Annotation;
 use App\Nodes\AnnotationInterface;
 
 use App\Nodes\Getter;
+use App\Nodes\Setter;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Illuminate\Support\Collection;
 use ReflectionProperty;
@@ -23,7 +24,7 @@ class DocParser
 
     /**
      * @param string $classNamespace
-     * @return Collection<AnnotationInterface>
+     * @return Collection<Collection<AnnotationInterface>>
      * @throws \ReflectionException
      */
     public function parse(string $classNamespace): Collection
@@ -32,10 +33,11 @@ class DocParser
 
         return (new Collection($classR->getProperties()))
             ->transform(
-                function (ReflectionProperty $property) {
-                    $ann = $this->reader->getPropertyAnnotation($property, Getter::class);
+                function (ReflectionProperty $property): ?Collection {
+                    $ann = $this->readAnnotation($property)
+                        ->filter(fn(?AnnotationInterface $annotation) => $annotation !== null);
 
-                    if ($ann === null) {
+                    if ($ann->isEmpty()) {
                         return null;
                     }
 
@@ -44,8 +46,21 @@ class DocParser
                         $props = '\\'.$props;
                     }
 
-                    return new Annotation($ann, $property->getName(), $props);
+                    return $ann->transform(
+                        fn(AnnotationInterface $annotation) => new Annotation($annotation, $property->getName(), $props)
+                    );
                 }
-            )->filter(fn(?Annotation $annotation) => $annotation !== null);
+            )
+            ->filter(fn(?Collection $annotation) => $annotation !== null);
+    }
+
+    private function readAnnotation(ReflectionProperty $property): Collection
+    {
+        return new Collection(
+            [
+                $this->reader->getPropertyAnnotation($property, Getter::class),
+                $this->reader->getPropertyAnnotation($property, Setter::class),
+            ]
+        );
     }
 }

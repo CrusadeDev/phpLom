@@ -34,10 +34,10 @@ class FileCacheService
         $this->config = $config;
     }
 
-    public function readFromCache(): CacheContent
+    public function readFromCache(FileName $fileName): CacheContent
     {
         try {
-            $content = (string)$this->fileReader->readFile($this->getFilePath());
+            $content = (string)$this->fileReader->readFile($this->getFilePath($fileName));
         } catch (\RuntimeException $exception) {
             return new CacheContent([]);
         }
@@ -45,16 +45,16 @@ class FileCacheService
         return new CacheContent($this->parser->decode(new JsonContent($content)));
     }
 
-    public function saveToCache(CacheContent $fileContent): void
+    public function saveToCache(CacheContent $fileContent, FileName $fileName): void
     {
         $this->fileSystem->dumpFile(
-            (string)$this->getFilePath(),
+            (string)$this->getFilePath($fileName),
             (string)$this->parser->encode($fileContent->toArray())
         );
     }
 
-    private function getFilePath(): Path
+    private function getFilePath(FileName $fileName): Path
     {
-        return $this->fileBuilder->buildFileName($this->config->getCachePath(), FileName::overrideCache());
+        return $this->fileBuilder->buildFileName($this->config->getCachePath(), $fileName);
     }
 }

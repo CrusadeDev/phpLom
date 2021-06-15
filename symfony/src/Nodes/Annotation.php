@@ -6,9 +6,6 @@ namespace App\Nodes;
 
 class Annotation
 {
-    /**
-     * @Getter
-     */
     private AnnotationInterface $annotation;
     private string $propertyName;
     private ?string $propertyType;
@@ -28,5 +25,10 @@ class Annotation
     public function getPropertyType(): ?string
     {
         return $this->propertyType;
+    }
+
+    public function getAnnotation(): AnnotationInterface
+    {
+        return $this->annotation;
     }
 }

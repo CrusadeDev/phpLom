@@ -19,7 +19,7 @@ class CacheContent
         $this->content = $content;
     }
 
-    public function add(string $key, string $value): self
+    public function add(string $key, array $value): self
     {
         $clone = $this->content;
 

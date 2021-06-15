@@ -12,7 +12,7 @@ if (!is_file(dirname(__DIR__).'/vendor/autoload_runtime.php')) {
 
 require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 
-$classLoader = new ClassLoader(new Config('/var/www/symfony/var/override'));
+$classLoader = new ClassLoader(new Config('/var/www/symfony/var/override', '/var/www/symfony/src', true));
 $classLoader->load();
 
 return function (array $context) {

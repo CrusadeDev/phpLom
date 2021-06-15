@@ -8,24 +8,32 @@ use App\Config\Config;
 use App\File\FileCacheService;
 use App\Parser\DocParser;
 use App\Parser\FileParser;
+use App\ValueObject\FileName;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
 class ClassLoader
 {
     private FileParser $fileParser;
     private FileCacheService $fileCacheService;
+    private Config $config;
+    private DocParser $docParser;
 
     public function __construct(Config $config)
     {
         $this->fileParser = new FileParser($config);
         $this->fileCacheService = new FileCacheService($config);
+        $this->config = $config;
+        $this->docParser = new DocParser();
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function load(): void
     {
-        $cache = $this->fileCacheService->readFromCache();
-
+        $cache = $this->fileCacheService->readFromCache(FileName::overrideCache());
 
         spl_autoload_register(
             function (string $className) use ($cache) {
@@ -33,13 +41,26 @@ class ClassLoader
                     return;
                 }
 
-                include $cache->toArray()[$className];
+                if (file_exists($cache->toArray()[$className]['result']) === false) {
+                    return;
+                }
+
+                include $cache->toArray()[$className]['result'];
             },
             true,
             true
         );
 
         AnnotationRegistry::registerLoader('class_exists');
+
+        if ($this->config->isDeveloperMode() === true) {
+
+            $finder = new Finder();
+
+            $files = $finder->files()->in((string)$this->config->getFilesPath())->depth('>0')->getIterator();
+
+            $this->parseAllFiles($files);
+        }
     }
 
     /**
@@ -48,26 +69,42 @@ class ClassLoader
      */
     public function parseAllFiles(\Iterator $files): void
     {
-        $cache = $this->fileCacheService->readFromCache();
+        $cache = $this->fileCacheService->readFromCache(FileName::overrideCache());
+        $fileCheckedCache = $this->fileCacheService->readFromCache(FileName::checkedFilesCache());
 
+        /** @var SplFileInfo $file */
         foreach ($files as $file) {
+            $filePath = $file->getPathname();
             $namespace = $this->fileParser->getNamespace($file->getPathname());
 
-            if ($namespace === null) {
+            $mtime = filemtime($file->getPath());
+
+            if (
+                array_key_exists($filePath, $fileCheckedCache->toArray())
+                && (int)$fileCheckedCache->toArray()[$filePath]['time'] === $mtime
+            ) {
                 continue;
             }
 
-            $annotations = (new DocParser())->parse($namespace);
+            if ($namespace === null) {
+                $fileCheckedCache = $fileCheckedCache->add($filePath, ['time' => $mtime]);
+                continue;
+            }
+
+            $annotations = $this->docParser->parse($namespace);
 
             if ($annotations->isEmpty()) {
+                $fileCheckedCache = $fileCheckedCache->add($filePath, ['time' => $mtime]);
                 continue;
             }
 
             $resultFile = $this->fileParser->parse($file, $annotations);
 
-            $cache = $cache->add($namespace, $resultFile);
+            $cache = $cache->add($namespace, ['result' => $resultFile, 'time' => filemtime($file->getPath())]);
+            $fileCheckedCache = $fileCheckedCache->add($filePath, ['time' => $mtime]);
         }
 
-        $this->fileCacheService->saveToCache($cache);
+        $this->fileCacheService->saveToCache($cache, FileName::overrideCache());
+        $this->fileCacheService->saveToCache($fileCheckedCache, FileName::checkedFilesCache());
     }
 }
