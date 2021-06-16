@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\File;
+namespace Crusade\PhpLom\File;
 
-use App\ValueObject\FileContent;
-use App\ValueObject\Path;
+use Crusade\PhpLom\ValueObject\FileContent;
+use Crusade\PhpLom\ValueObject\Path;
 
 class FileReader
 {

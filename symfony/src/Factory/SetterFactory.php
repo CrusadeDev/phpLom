@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Factory;
+namespace Crusade\PhpLom\Factory;
 
-use App\Nodes\Annotation;
+use Crusade\PhpLom\Nodes\PropertyData;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param;
 use PhpParser\Node\Expr\Assign;
@@ -14,23 +14,23 @@ use PhpParser\Node\Stmt\ClassMethod;
 
 class SetterFactory
 {
-    public function build(Annotation $annotation): ClassMethod
+    public function build(PropertyData $PropertyData): ClassMethod
     {
-        $builder = new Method($this->buildName($annotation->getPropertyName()));
+        $builder = new Method($this->buildName($PropertyData->getPropertyName()));
         $builder->makePublic();
         $builder->setReturnType('void');
-        $param = new Param($annotation->getPropertyName());
+        $param = new Param($PropertyData->getPropertyName());
 
-        if ($annotation->getPropertyType() !== '') {
-            $param->setType($annotation->getPropertyType());
+        if ($PropertyData->getPropertyType() !== '') {
+            $param->setType($PropertyData->getPropertyType());
         }
         $param = $param->getNode();
         $builder->addParam($param);
 
-        $variable = new Variable($annotation->getPropertyName());
+        $variable = new Variable($PropertyData->getPropertyName());
 
         $v = new Variable('this');
-        $f = new PropertyFetch($v, $annotation->getPropertyName());
+        $f = new PropertyFetch($v, $PropertyData->getPropertyName());
         $return = new Assign($f,$variable);
         $builder->addStmt($return);
 

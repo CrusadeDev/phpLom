@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Config;
+namespace Crusade\PhpLom\Config;
 
-use App\ValueObject\Path;
+use Crusade\PhpLom\ValueObject\Path;
 
 class Config
 {

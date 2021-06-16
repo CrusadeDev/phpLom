@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Override;
+namespace Crusade\PhpLom\Override;
 
-use App\Config\Config;
-use App\File\FileCacheService;
-use App\Parser\DocParser;
-use App\Parser\FileParser;
-use App\ValueObject\FileName;
+use Crusade\PhpLom\Config\Config;
+use Crusade\PhpLom\File\FileCacheService;
+use Crusade\PhpLom\Parser\DocParser;
+use Crusade\PhpLom\Parser\FileParser;
+use Crusade\PhpLom\ValueObject\FileName;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;

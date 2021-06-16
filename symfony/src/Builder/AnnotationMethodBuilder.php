@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Builder;
+namespace Crusade\PhpLom\Builder;
 
-use App\Factory\GetterFactory;
-use App\Factory\SetterFactory;
-use App\Nodes\Annotation;
-use App\Nodes\Getter;
-use App\Nodes\Setter;
+use Crusade\PhpLom\Factory\GetterFactory;
+use Crusade\PhpLom\Factory\SetterFactory;
+use Crusade\PhpLom\Nodes\PropertyData;
+use Crusade\PhpLom\Nodes\Getter;
+use Crusade\PhpLom\Nodes\Setter;
 use PhpParser\Node\Stmt;
 
 class AnnotationMethodBuilder
@@ -22,14 +22,16 @@ class AnnotationMethodBuilder
         $this->setterFactory = new SetterFactory();
     }
 
-    public function buildForAnnotation(Annotation $annotation): Stmt
+    public function buildForAnnotation(PropertyData $propertyData): Stmt\ClassMethod
     {
-        if ($annotation->getAnnotation() instanceof Getter) {
-            return $this->getterFactory->build($annotation);
+        if ($propertyData->getAnnotation() instanceof Getter) {
+            return $this->getterFactory->build($propertyData);
         }
 
-        if ($annotation->getAnnotation() instanceof Setter) {
-            return $this->setterFactory->build($annotation);
+        if ($propertyData->getAnnotation() instanceof Setter) {
+            return $this->setterFactory->build($propertyData);
         }
+
+        throw new \LogicException('Unsupported Annotation');
     }
 }

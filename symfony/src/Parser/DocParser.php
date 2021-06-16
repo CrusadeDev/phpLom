@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Parser;
+namespace Crusade\PhpLom\Parser;
 
-use App\Nodes\Annotation;
-use App\Nodes\AnnotationInterface;
+use Crusade\PhpLom\Nodes\PropertyData;
+use Crusade\PhpLom\Nodes\AnnotationInterface;
 
-use App\Nodes\Getter;
-use App\Nodes\Setter;
+use Crusade\PhpLom\Nodes\Getter;
+use Crusade\PhpLom\Nodes\Setter;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Illuminate\Support\Collection;
 use ReflectionProperty;
@@ -47,11 +47,11 @@ class DocParser
                     }
 
                     return $ann->transform(
-                        fn(AnnotationInterface $annotation) => new Annotation($annotation, $property->getName(), $props)
+                        fn(AnnotationInterface $annotation) => new PropertyData($annotation, $property->getName(), $props)
                     );
                 }
             )
-            ->filter(fn(?Collection $annotation) => $annotation !== null);
+            ->filter(fn(?Collection $PropertyData) => $PropertyData !== null);
     }
 
     private function readAnnotation(ReflectionProperty $property): Collection

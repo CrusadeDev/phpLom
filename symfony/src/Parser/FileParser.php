@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Parser;
+namespace Crusade\PhpLom\Parser;
 
-use App\Builder\AnnotationMethodBuilder;
-use App\Config\Config;
-use App\File\OverrideFileService;
-use App\Nodes\Annotation;
-use App\Nodes\Getter;
-use App\Nodes\Setter;
-use App\ValueObject\FileContent;
-use App\ValueObject\FileName;
+use Crusade\PhpLom\Builder\AnnotationMethodBuilder;
+use Crusade\PhpLom\Builder\PhpDocBuilder;
+use Crusade\PhpLom\Config\Config;
+use Crusade\PhpLom\File\OverrideFileService;
+use Crusade\PhpLom\Nodes\PropertyData;
+use Crusade\PhpLom\ValueObject\FileContent;
+use Crusade\PhpLom\ValueObject\FileName;
+use Crusade\PhpLom\ValueObject\GeneratedMethodData;
 use Illuminate\Support\Collection;
-use PhpParser\Comment\Doc;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Parser;
@@ -21,15 +20,13 @@ use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
 use Symfony\Component\Finder\SplFileInfo;
 
-/**
- * @method int dead(string)
- */
 class FileParser
 {
     private Parser $parser;
     private AnnotationMethodBuilder $builder;
     private OverrideFileService $overrideFileService;
     private Config $config;
+    private PhpDocBuilder $docBuilder;
 
     public function __construct(Config $config)
     {
@@ -37,6 +34,7 @@ class FileParser
         $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
         $this->builder = new AnnotationMethodBuilder();
         $this->overrideFileService = new OverrideFileService($config);
+        $this->docBuilder = new PhpDocBuilder();
     }
 
     public function parse(SplFileInfo $filePath, Collection $annotations): ?string
@@ -58,29 +56,19 @@ class FileParser
             function (Collection $annotation) use ($class, &$generated) {
                 $annotation
                     ->transform(
-                        function (Annotation $ann) use (&$generated) {
+                        function (PropertyData $ann) use (&$generated) {
                             $stmt = $this->builder->buildForAnnotation($ann);
 
-                            $generated->add(['stmt' => $stmt, 'ann' => $ann]);
+                            $generated->add(new GeneratedMethodData($ann, $stmt->name->toString()));
 
                             return $stmt;
                         }
                     )
-                    ->tap(fn(Collection $collection) => $generated = $collection)
                     ->each(fn(Stmt $stmt) => $class->stmts[] = $stmt);
             }
         );
 
-        $doc = $generated->transform(fn(array $stmt) => $this->getMethodDocDoc($stmt));
-
-        $s = "/** \n";
-        $doc->each(
-            function (string $d) use (&$s) {
-                return $s .= $d;
-            }
-        );
-        $s .= '*/';
-        $doc = new Doc($s);
+        $phpDoc = $this->docBuilder->buildForGeneratedMethods($generated);
 
         $prettyPrinter = new Standard;
         $code1 = $prettyPrinter->prettyPrintFile($ast->all());
@@ -90,7 +78,7 @@ class FileParser
         $namespace = $this->findNamespace($ast2);
         $class = $this->findClasses($namespace);
 
-        $class->setDocComment($doc);
+        $class->setDocComment($phpDoc->toDoc());
 
         $this->overrideFileService->addDoc(
             $filePath->getPathname(),
@@ -137,23 +125,5 @@ class FileParser
         $namespaceString = $namespace->name->toCodeString();
 
         return "$namespaceString\\$className";
-    }
-
-    private function getMethodDocDoc(array $stmt): string
-    {
-        $ann = $stmt['ann'];
-
-        $type = $stmt['ann']->getPropertyType();
-        $name = $stmt['stmt']->name->toString();
-
-        if ($ann->getAnnotation() instanceof Setter) {
-            return " * @method void $name($type \${$ann->getPropertyName()})\n  ";
-        }
-
-        if ($ann->getAnnotation() instanceof Getter) {
-            return " * @method $type $name()\n  ";
-        }
-
-        return '';
     }
 }

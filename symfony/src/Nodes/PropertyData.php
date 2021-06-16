@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Nodes;
+namespace Crusade\PhpLom\Nodes;
 
-class Annotation
+class PropertyData
 {
     private AnnotationInterface $annotation;
     private string $propertyName;

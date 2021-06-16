@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Nodes;
+namespace Crusade\PhpLom\Nodes;
 
 /**
  * @Annotation

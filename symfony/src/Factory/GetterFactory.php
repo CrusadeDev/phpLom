@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Factory;
+namespace Crusade\PhpLom\Factory;
 
-use App\Nodes\Annotation;
+use Crusade\PhpLom\Nodes\PropertyData;
 use PhpParser\Builder\Method;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\Variable;
@@ -13,16 +13,16 @@ use PhpParser\Node\Stmt\Return_;
 
 class GetterFactory
 {
-    public function build(Annotation $annotation): ClassMethod
+    public function build(PropertyData $PropertyData): ClassMethod
     {
-        $builder = new Method($this->buildName($annotation->getPropertyName()));
+        $builder = new Method($this->buildName($PropertyData->getPropertyName()));
         $builder->makePublic();
-        if ($annotation->getPropertyType() !== '') {
-            $builder->setReturnType($annotation->getPropertyType());
+        if ($PropertyData->getPropertyType() !== '') {
+            $builder->setReturnType($PropertyData->getPropertyType());
         }
 
         $v = new Variable('this');
-        $f = new PropertyFetch($v, $annotation->getPropertyName());
+        $f = new PropertyFetch($v, $PropertyData->getPropertyName());
         $return = new Return_($f);
         $builder->addStmt($return);
 

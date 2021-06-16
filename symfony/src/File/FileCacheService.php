@@ -6,15 +6,15 @@
 
 declare(strict_types=1);
 
-namespace App\File;
+namespace Crusade\PhpLom\File;
 
-use App\Builder\FilePathBuilder;
-use App\Config\Config;
-use App\Parser\JsonParser;
-use App\ValueObject\CacheContent;
-use App\ValueObject\FileName;
-use App\ValueObject\JsonContent;
-use App\ValueObject\Path;
+use Crusade\PhpLom\Builder\FilePathBuilder;
+use Crusade\PhpLom\Config\Config;
+use Crusade\PhpLom\Parser\JsonParser;
+use Crusade\PhpLom\ValueObject\CacheContent;
+use Crusade\PhpLom\ValueObject\FileName;
+use Crusade\PhpLom\ValueObject\JsonContent;
+use Crusade\PhpLom\ValueObject\Path;
 use Symfony\Component\Filesystem\Filesystem;
 
 class FileCacheService

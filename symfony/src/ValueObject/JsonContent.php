@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ValueObject;
+namespace Crusade\PhpLom\ValueObject;
 
 class JsonContent
 {

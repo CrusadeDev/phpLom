@@ -6,9 +6,9 @@
 
 declare(strict_types=1);
 
-namespace App\Parser;
+namespace Crusade\PhpLom\Parser;
 
-use App\ValueObject\JsonContent;
+use Crusade\PhpLom\ValueObject\JsonContent;
 
 class JsonParser
 {

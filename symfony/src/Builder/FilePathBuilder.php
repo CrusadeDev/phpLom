@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Builder;
+namespace Crusade\PhpLom\Builder;
 
-use App\ValueObject\FileName;
-use App\ValueObject\Path;
+use Crusade\PhpLom\ValueObject\FileName;
+use Crusade\PhpLom\ValueObject\Path;
 
 class FilePathBuilder
 {

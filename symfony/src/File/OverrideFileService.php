@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\File;
+namespace Crusade\PhpLom\File;
 
-use App\Builder\FilePathBuilder;
-use App\Config\Config;
-use App\ValueObject\FileContent;
-use App\ValueObject\FileName;
-use App\ValueObject\Path;
+use Crusade\PhpLom\Builder\FilePathBuilder;
+use Crusade\PhpLom\Config\Config;
+use Crusade\PhpLom\ValueObject\FileContent;
+use Crusade\PhpLom\ValueObject\FileName;
+use Crusade\PhpLom\ValueObject\Path;
 use Symfony\Component\Filesystem\Filesystem;
 
 class OverrideFileService
