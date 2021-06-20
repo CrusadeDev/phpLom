@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Factory;
 
-use Crusade\PhpLom\Nodes\Getter;
-use Crusade\PhpLom\Nodes\Setter;
+use Crusade\PhpLom\Decorator\Annotation\Getter;
+use Crusade\PhpLom\Decorator\Annotation\Setter;
 use Crusade\PhpLom\ValueObject\GeneratedMethodData;
 use Crusade\PhpLom\ValueObject\PhpDoc;
 

@@ -8,7 +8,7 @@ use Crusade\PhpLom\Builder\AnnotationMethodBuilder;
 use Crusade\PhpLom\Builder\PhpDocBuilder;
 use Crusade\PhpLom\Config\Config;
 use Crusade\PhpLom\File\OverrideFileService;
-use Crusade\PhpLom\Nodes\PropertyData;
+use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
 use Crusade\PhpLom\ValueObject\FileContent;
 use Crusade\PhpLom\ValueObject\FileName;
 use Crusade\PhpLom\ValueObject\GeneratedMethodData;

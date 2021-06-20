@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Parser;
 
-use Crusade\PhpLom\Nodes\PropertyData;
-use Crusade\PhpLom\Nodes\AnnotationInterface;
+use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
+use Crusade\PhpLom\Decorator\Interfaces\AnnotationInterface;
 
-use Crusade\PhpLom\Nodes\Getter;
-use Crusade\PhpLom\Nodes\Setter;
+use Crusade\PhpLom\Decorator\Annotation\Getter;
+use Crusade\PhpLom\Decorator\Annotation\Setter;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Illuminate\Support\Collection;
 use ReflectionProperty;
@@ -25,11 +25,14 @@ class DocParser
     /**
      * @param string $classNamespace
      * @return Collection<Collection<AnnotationInterface>>
-     * @throws \ReflectionException
      */
     public function parse(string $classNamespace): Collection
     {
-        $classR = new \ReflectionClass($classNamespace);
+        try {
+            $classR = new \ReflectionClass($classNamespace);
+        } catch (\ReflectionException $e) {
+            return new Collection();
+        }
 
         return (new Collection($classR->getProperties()))
             ->transform(
@@ -47,7 +50,11 @@ class DocParser
                     }
 
                     return $ann->transform(
-                        fn(AnnotationInterface $annotation) => new PropertyData($annotation, $property->getName(), $props)
+                        fn(AnnotationInterface $annotation) => new PropertyData(
+                            $annotation,
+                            $property->getName(),
+                            $props
+                        )
                     );
                 }
             )

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Factory;
 
-use Crusade\PhpLom\Nodes\PropertyData;
+use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param;
 use PhpParser\Node\Expr\Assign;

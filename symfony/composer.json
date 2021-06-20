@@ -7,11 +7,14 @@
   "require": {
     "php": ">=7.4",
     "ext-json": "*",
-    "doctrine/annotations": "^1.13",
-    "illuminate/collections": "^8.46",
-    "nikic/php-parser": "^4.10",
-    "symfony/finder": "5.3.*",
-    "symfony/filesystem": "^5.3"
+    "doctrine/annotations": "1.1.*",
+    "illuminate/collections": "8.*",
+    "nikic/php-parser": "4.*",
+    "symfony/finder": "5.*",
+    "symfony/filesystem": "5.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9"
   },
   "config": {
     "optimize-autoloader": true,

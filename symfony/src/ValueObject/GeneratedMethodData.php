@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\ValueObject;
 
-use Crusade\PhpLom\Nodes\PropertyData;
+use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
 
 class GeneratedMethodData
 {

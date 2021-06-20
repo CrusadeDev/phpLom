@@ -6,9 +6,9 @@ namespace Crusade\PhpLom\Builder;
 
 use Crusade\PhpLom\Factory\GetterFactory;
 use Crusade\PhpLom\Factory\SetterFactory;
-use Crusade\PhpLom\Nodes\PropertyData;
-use Crusade\PhpLom\Nodes\Getter;
-use Crusade\PhpLom\Nodes\Setter;
+use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
+use Crusade\PhpLom\Decorator\Annotation\Getter;
+use Crusade\PhpLom\Decorator\Annotation\Setter;
 use PhpParser\Node\Stmt;
 
 class AnnotationMethodBuilder

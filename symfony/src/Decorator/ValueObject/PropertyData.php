@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Crusade\PhpLom\Nodes;
+namespace Crusade\PhpLom\Decorator\ValueObject;
 
-class PropertyData
+use Crusade\PhpLom\Decorator\Interfaces\AnnotationInterface;
+use Crusade\PhpLom\Decorator\Interfaces\DecoratorDataInterface;
+
+class PropertyData implements DecoratorDataInterface
 {
     private AnnotationInterface $annotation;
     private string $propertyName;
