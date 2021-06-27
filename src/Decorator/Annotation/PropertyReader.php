@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Decorator\Annotation;
 
-use Crusade\PhpLom\Factory\PropertyDataFactory;
+use Crusade\PhpLom\Decorator\Factory\PropertyDataFactory;
 use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Illuminate\Support\Collection;

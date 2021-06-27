@@ -6,7 +6,7 @@ namespace Crusade\PhpLom\Decorator\Annotation;
 
 use Crusade\PhpLom\Decorator\Interfaces\DecoratorDataInterface;
 use Crusade\PhpLom\Decorator\ValueObject\ClassData;
-use Crusade\PhpLom\Factory\PropertyDataFactory;
+use Crusade\PhpLom\Decorator\Factory\PropertyDataFactory;
 use Crusade\PhpLom\Decorator\Interfaces\AnnotationInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Illuminate\Support\Collection;

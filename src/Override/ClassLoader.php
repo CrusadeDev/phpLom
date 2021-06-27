@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Crusade\PhpLom\Override;
 
 use Crusade\PhpLom\Config\Config;
+use Crusade\PhpLom\Decorator\DecoratorFacade;
 use Crusade\PhpLom\File\FileCacheService;
-use Crusade\PhpLom\Parser\DocParser;
 use Crusade\PhpLom\Parser\FileParser;
 use Crusade\PhpLom\ValueObject\FileName;
 use Doctrine\Common\Annotations\AnnotationRegistry;
@@ -18,14 +18,14 @@ class ClassLoader
     private FileParser $fileParser;
     private FileCacheService $fileCacheService;
     private Config $config;
-    private DocParser $docParser;
+    private DecoratorFacade $decoratorFacade;
 
     public function __construct(Config $config)
     {
         $this->fileParser = new FileParser($config);
         $this->fileCacheService = new FileCacheService($config);
         $this->config = $config;
-        $this->docParser = new DocParser();
+        $this->decoratorFacade = new DecoratorFacade();
     }
 
     /**
@@ -91,7 +91,7 @@ class ClassLoader
                 continue;
             }
 
-            $annotations = $this->docParser->parse($namespace);
+            $annotations = $this->decoratorFacade->readAnnotations($namespace);
 
             if ($annotations->isEmpty()) {
                 $fileCheckedCache = $fileCheckedCache->add($filePath, ['time' => $mtime]);

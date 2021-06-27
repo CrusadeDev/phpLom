@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Parser;
 
+use Crusade\PhpLom\Ast\AstFinder\AstFinder;
 use Crusade\PhpLom\Builder\AnnotationMethodBuilder;
 use Crusade\PhpLom\Builder\PhpDocBuilder;
 use Crusade\PhpLom\Config\Config;
-use Crusade\PhpLom\File\OverrideFileService;
 use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
+use Crusade\PhpLom\File\OverrideFileService;
 use Crusade\PhpLom\ValueObject\FileContent;
 use Crusade\PhpLom\ValueObject\FileName;
 use Crusade\PhpLom\ValueObject\GeneratedMethodData;
@@ -27,6 +28,7 @@ class FileParser
     private OverrideFileService $overrideFileService;
     private Config $config;
     private PhpDocBuilder $docBuilder;
+    private AstFinder $traverser;
 
     public function __construct(Config $config)
     {
@@ -35,6 +37,7 @@ class FileParser
         $this->builder = new AnnotationMethodBuilder();
         $this->overrideFileService = new OverrideFileService($config);
         $this->docBuilder = new PhpDocBuilder();
+        $this->traverser = new AstFinder();
     }
 
     public function parse(SplFileInfo $filePath, Collection $annotations): ?string
@@ -43,8 +46,8 @@ class FileParser
 
         $code = file_get_contents($filePath->getPathname());
         $ast = new Collection($this->parser->parse($code));
-        $namespace = $this->findNamespace($ast);
-        $class = $this->findClasses($namespace);
+        $clonedAst = $ast->all();
+        $class = $this->traverser->findClass($ast->all());
 
         if ($class === null) {
             return null;
@@ -74,15 +77,13 @@ class FileParser
         $code1 = $prettyPrinter->prettyPrintFile($ast->all());
         $this->overrideFileService->save(FileName::fromString($filePath->getFilename()), new FileContent($code1));
 
-        $ast2 = new Collection((new ParserFactory)->create(ParserFactory::PREFER_PHP7)->parse($code));
-        $namespace = $this->findNamespace($ast2);
-        $class = $this->findClasses($namespace);
+        $class = $this->traverser->findClass($clonedAst);
 
         $class->setDocComment($phpDoc->toDoc());
 
         $this->overrideFileService->addDoc(
             $filePath->getPathname(),
-            new FileContent($prettyPrinter->prettyPrintFile($ast2->all()))
+            new FileContent($prettyPrinter->prettyPrintFile($clonedAst))
         );
 
         return $resultFile;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\File;
 
+use Crusade\PhpLom\Ast\ValueObject\PrintedClass;
 use Crusade\PhpLom\Builder\FilePathBuilder;
 use Crusade\PhpLom\Config\Config;
 use Crusade\PhpLom\ValueObject\FileContent;
@@ -24,9 +25,12 @@ class OverrideFileService
         $this->config = $config;
     }
 
-    public function save(FileName $name, FileContent $content): void
+    public function save(FileName $name, PrintedClass $content): string
     {
-        $this->fileSystem->dumpFile((string)$this->getFilePath($name), $content);
+        $path = (string)$this->getFilePath($name);
+        $this->fileSystem->dumpFile($path, $content);
+
+        return $path;
     }
 
     public function addDoc(string $file, FileContent $content): void

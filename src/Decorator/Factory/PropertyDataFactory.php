@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Crusade\PhpLom\Factory;
+namespace Crusade\PhpLom\Decorator\Factory;
 
 use Crusade\PhpLom\Decorator\Interfaces\AnnotationInterface;
 use Crusade\PhpLom\Decorator\ValueObject\PropertyData;

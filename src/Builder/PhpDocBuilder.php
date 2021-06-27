@@ -4,28 +4,32 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Builder;
 
-use Crusade\PhpLom\Factory\DocFactory;
+use Crusade\PhpLom\Factory\PhpDocFactory;
 use Crusade\PhpLom\ValueObject\GeneratedMethodData;
 use Crusade\PhpLom\ValueObject\PhpDoc;
 use Illuminate\Support\Collection;
+use PhpParser\Node\Stmt\Class_;
 
 class PhpDocBuilder
 {
     private string $doc;
-    private DocFactory $docFactory;
+    private PhpDocFactory $docFactory;
 
     public function __construct()
     {
         $this->doc = '';
-        $this->docFactory = new DocFactory();
+        $this->docFactory = new PhpDocFactory();
     }
 
     /**
      * @param Collection<GeneratedMethodData> $methods
+     * @param Class_ $class
      * @return PhpDoc
      */
-    public function buildForGeneratedMethods(Collection $methods): PhpDoc
+    public function buildForGeneratedMethods(Collection $methods, Class_ $class): PhpDoc
     {
+        (string)$currentDoc = $class->getDocComment();
+
         $this->start();
 
         $methods

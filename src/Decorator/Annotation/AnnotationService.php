@@ -20,6 +20,7 @@ class AnnotationService
     }
 
     /**
+     * @param string $namespace
      * @return Collection<DecoratorDataInterface>
      * @throws \ReflectionException
      */
@@ -35,6 +36,7 @@ class AnnotationService
         return $annotationsFromClass;
     }
 
+    /** TODO extract to helper */
     private function mergeUnique(Collection $annotationsFromClass, Collection $annotationsFromProperty): void
     {
         $annotationsFromProperty->each(

@@ -1,12 +1,14 @@
 <?php
 
+/** @noinspection PhpParamsInspection */
+
 declare(strict_types=1);
 
 namespace Crusade\PhpLom\Builder;
 
+use Crusade\PhpLom\Decorator\Interfaces\DecoratorDataInterface;
 use Crusade\PhpLom\Factory\GetterFactory;
 use Crusade\PhpLom\Factory\SetterFactory;
-use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
 use Crusade\PhpLom\Decorator\Annotation\Getter;
 use Crusade\PhpLom\Decorator\Annotation\Setter;
 use PhpParser\Node\Stmt;
@@ -22,7 +24,7 @@ class AnnotationMethodBuilder
         $this->setterFactory = new SetterFactory();
     }
 
-    public function buildForAnnotation(PropertyData $propertyData): Stmt\ClassMethod
+    public function buildForAnnotation(DecoratorDataInterface $propertyData): Stmt\ClassMethod
     {
         if ($propertyData->getAnnotation() instanceof Getter) {
             return $this->getterFactory->build($propertyData);

@@ -9,7 +9,7 @@ use Crusade\PhpLom\Decorator\Annotation\Setter;
 use Crusade\PhpLom\ValueObject\GeneratedMethodData;
 use Crusade\PhpLom\ValueObject\PhpDoc;
 
-class DocFactory
+class PhpDocFactory
 {
     public function buildForGeneratedMethod(GeneratedMethodData $generatedMethodData): PhpDoc
     {
