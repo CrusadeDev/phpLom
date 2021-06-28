@@ -29,7 +29,7 @@ class NamespaceFinderVisitor extends NodeVisitorAbstract
 
     public function getNamespace(): Node\Stmt\Namespace_
     {
-        if ($this->hasNamespace() === true) {
+        if ($this->hasNamespace() === false) {
             throw new \LogicException('Class was not found in file');
         }
 

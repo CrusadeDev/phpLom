@@ -10,6 +10,7 @@ use Crusade\PhpLom\Ast\ValueObject\ParsedFile;
 use Crusade\PhpLom\Ast\ValueObject\PrintedClass;
 use Crusade\PhpLom\ValueObject\Path;
 use Illuminate\Support\Collection;
+use PhpParser\Node\Stmt\Function_;
 
 class PhpFileParserFacade
 {
@@ -26,6 +27,9 @@ class PhpFileParserFacade
     }
 
     /**
+     * @param Collection<Function_> $generatedMethods
+     * @param ParsedFile $parsedFile
+     * @return ParsedFile
      * @throws FileDoesNotHaveClassException
      */
     public function attachedGeneratedMethodsToClass(Collection $generatedMethods, ParsedFile $parsedFile): ParsedFile

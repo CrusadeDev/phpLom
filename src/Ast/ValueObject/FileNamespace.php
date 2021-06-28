@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Ast\ValueObject;
 
-use PhpParser\Node\Stmt\Namespace_;
-
 class FileNamespace
 {
-    private ?Namespace_ $namespace;
+    private ?string $namespace;
 
-    public function __construct(?Namespace_ $namespace)
+    public function __construct(?string $namespace)
     {
         $this->namespace = $namespace;
     }
 
     public function getNamespace(): string
     {
-        return $this->namespace->name->toString();
+        if ($this->hasNamespace() === false) {
+            throw new \LogicException('Namespace not found');
+        }
+
+        return $this->namespace;
     }
 
     public function hasNamespace(): bool

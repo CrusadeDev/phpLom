@@ -103,21 +103,23 @@
     <inspection_tool class="PhpDocMissingThrowsInspection" enabled="true" level="WEAK WARNING" enabled_by_default="false">
       <scope name="Tests" level="INFORMATION" enabled="true" />
     </inspection_tool>
+    <inspection_tool class="PhpDocSignatureIsNotCompleteInspection" enabled="true" level="INFORMATION" enabled_by_default="true" />
     <inspection_tool class="PhpFullyQualifiedNameUsageInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="IGNORE_GLOBAL_NAMESPACE" value="true" />
     </inspection_tool>
     <inspection_tool class="PhpMissingDocCommentInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-      <scope name="Project Files" level="WEAK WARNING" enabled="true">
+      <scope name="Project Files" level="WEAK WARNING" enabled="false">
         <option name="CHECK_CLASS" value="false" />
         <option name="CHECK_FIELD" value="true" />
       </scope>
-      <scope name="Tests" level="WEAK WARNING" enabled="true">
+      <scope name="Tests" level="WEAK WARNING" enabled="false">
         <option name="CHECK_CLASS" value="false" />
         <option name="CHECK_FIELD" value="true" />
       </scope>
       <option name="CHECK_CLASS" value="false" />
       <option name="CHECK_FIELD" value="true" />
     </inspection_tool>
+    <inspection_tool class="PhpRedundantDocCommentInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
     <inspection_tool class="PhpStanGlobal" enabled="false" level="WEAK WARNING" enabled_by_default="false">
       <option name="config" value="$PROJECT_DIR$/phpstan.neon" />
     </inspection_tool>

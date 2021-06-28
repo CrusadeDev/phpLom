@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crusade\PhpLom\Ast;
 
 use Crusade\PhpLom\Ast\AstFinder\AstFinder;
+use Crusade\PhpLom\Ast\AstModifier\AstModifier;
 use Crusade\PhpLom\Ast\Exceptions\FileDoesNotHaveClassException;
 use Crusade\PhpLom\Ast\ValueObject\FileNamespace;
 use Crusade\PhpLom\Ast\ValueObject\ParsedFile;
@@ -13,6 +14,7 @@ use Crusade\PhpLom\File\FileReader;
 use Crusade\PhpLom\ValueObject\Path;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Function_;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
@@ -23,6 +25,7 @@ class PhpParserService
     private AstFinder $traverser;
     private Parser $parser;
     private Standard $printer;
+    private AstModifier $astModifier;
 
     public function __construct()
     {
@@ -30,6 +33,7 @@ class PhpParserService
         $this->traverser = new AstFinder();
         $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
         $this->printer = new Standard();
+        $this->astModifier = new AstModifier();
     }
 
     public function parseFileToAst(Path $filePath): ParsedFile
@@ -41,13 +45,14 @@ class PhpParserService
     }
 
     /**
+     * @param Collection<Function_> $generatedMethods
      * @throws FileDoesNotHaveClassException
      */
     public function attachedGeneratedMethodsToClass(Collection $generatedMethods, ParsedFile $parsedFile): ParsedFile
     {
         $ast = $parsedFile->getAst();
 
-        $class = $this->traverser->findClass($ast);
+        $class = clone $this->traverser->findClass($ast);
 
         if ($class === false) {
             throw FileDoesNotHaveClassException::create($parsedFile);
@@ -55,7 +60,9 @@ class PhpParserService
 
         $generatedMethods->each(fn(ClassMethod $method) => $class->stmts[] = $method);
 
-        return new ParsedFile($ast, $parsedFile->getFilePath());
+        $modifiedAst = $this->astModifier->replaceClass($ast, $class);
+
+        return new ParsedFile($modifiedAst, $parsedFile->getFilePath());
     }
 
     public function printClass(ParsedFile $parsedFile): PrintedClass
@@ -65,9 +72,10 @@ class PhpParserService
 
     public function getNamespace(ParsedFile $parsedFile): FileNamespace
     {
-        $namespace = $this->traverser->findNamespace($parsedFile->getAst());
+        $namespace = $this->traverser->findNamespace($parsedFile->getAst())->name->toString();
+        $class = $this->traverser->findClass($parsedFile->getAst())->name->toString();
 
-        return new FileNamespace($namespace);
+        return new FileNamespace("$namespace\\$class");
     }
 
     public function hasClass(ParsedFile $parsedFile): bool

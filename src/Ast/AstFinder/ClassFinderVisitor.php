@@ -29,7 +29,7 @@ class ClassFinderVisitor extends NodeVisitorAbstract
 
     public function getClass(): Node\Stmt\Class_
     {
-        if ($this->hasClass() === true) {
+        if ($this->hasClass() === false) {
             throw new \LogicException('Class was not found in file');
         }
 
