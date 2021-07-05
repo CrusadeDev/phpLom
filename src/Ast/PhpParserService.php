@@ -7,11 +7,13 @@ namespace Crusade\PhpLom\Ast;
 use Crusade\PhpLom\Ast\AstFinder\AstFinder;
 use Crusade\PhpLom\Ast\AstModifier\AstModifier;
 use Crusade\PhpLom\Ast\Exceptions\FileDoesNotHaveClassException;
+use Crusade\PhpLom\Ast\ValueObject\FileClass;
 use Crusade\PhpLom\Ast\ValueObject\FileNamespace;
 use Crusade\PhpLom\Ast\ValueObject\ParsedFile;
 use Crusade\PhpLom\Ast\ValueObject\PrintedClass;
 use Crusade\PhpLom\File\FileReader;
 use Crusade\PhpLom\ValueObject\Path;
+use Crusade\PhpLom\ValueObject\PhpDoc;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Function_;
@@ -72,10 +74,33 @@ class PhpParserService
 
     public function getNamespace(ParsedFile $parsedFile): FileNamespace
     {
-        $namespace = $this->traverser->findNamespace($parsedFile->getAst())->name->toString();
-        $class = $this->traverser->findClass($parsedFile->getAst())->name->toString();
+        $namespace = $this->traverser->findNamespace($parsedFile->getAst());
 
-        return new FileNamespace("$namespace\\$class");
+        if (is_null($namespace) === true) {
+            return new FileNamespace(null);
+        }
+
+        $namespaceAsString = $namespace->name->toString();
+        $class = $this->traverser->findClass($parsedFile->getAst());
+
+        if (is_null($class) === true) {
+            return new FileNamespace($namespaceAsString);
+        }
+
+        $className = $class->name->toString();
+
+        return new FileNamespace("$namespaceAsString\\$className");
+    }
+
+    public function getClass(ParsedFile $parsedFile): FileClass
+    {
+        $class = $this->traverser->findClass($parsedFile->getAst());
+
+        if (is_null($class) === true) {
+            return new FileClass(null);
+        }
+
+        return new FileClass($class);
     }
 
     public function hasClass(ParsedFile $parsedFile): bool
@@ -83,5 +108,16 @@ class PhpParserService
         $ast = $parsedFile->getAst();
 
         return $this->traverser->findClass($ast) !== null;
+    }
+
+    public function attachDocToClass(ParsedFile $parsedFile, PhpDoc $phpDoc): ParsedFile
+    {
+        if ($this->hasClass($parsedFile) === false) {
+            throw new \LogicException('Ast does not have class');
+        }
+
+        $modifiedAst = $this->astModifier->replaceDocOnClass($parsedFile->getAst(), $phpDoc);
+
+        return new ParsedFile($modifiedAst, $parsedFile->getFilePath());
     }
 }

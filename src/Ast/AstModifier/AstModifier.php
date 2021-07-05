@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crusade\PhpLom\Ast\AstModifier;
 
 use Crusade\PhpLom\Ast\AstFinder\AstFinder;
+use Crusade\PhpLom\ValueObject\PhpDoc;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\NodeTraverser;
@@ -28,7 +29,17 @@ class AstModifier
         $namespace = clone $this->astFinder->findNamespace($ast);
         $modifiedAst = $this->replaceNamespace($ast, $namespace);
 
-        $classFinder = new ClassModifierVisitor($class);
+        $classFinder = new ClassReplacmentVisitor($class);
+
+        return $this->traverse($classFinder, $modifiedAst);
+    }
+
+    public function replaceDocOnClass(array $ast, PhpDoc $phpDoc): array
+    {
+        $namespace = clone $this->astFinder->findNamespace($ast);
+        $modifiedAst = $this->replaceNamespace($ast, $namespace);
+
+        $classFinder = new ClassDocReplacementVisitor($phpDoc);
 
         return $this->traverse($classFinder, $modifiedAst);
     }

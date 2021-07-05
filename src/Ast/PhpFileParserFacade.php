@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Crusade\PhpLom\Ast;
 
 use Crusade\PhpLom\Ast\Exceptions\FileDoesNotHaveClassException;
+use Crusade\PhpLom\Ast\ValueObject\FileClass;
 use Crusade\PhpLom\Ast\ValueObject\FileNamespace;
 use Crusade\PhpLom\Ast\ValueObject\ParsedFile;
 use Crusade\PhpLom\Ast\ValueObject\PrintedClass;
 use Crusade\PhpLom\ValueObject\Path;
+use Crusade\PhpLom\ValueObject\PhpDoc;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\Function_;
 
@@ -50,5 +52,15 @@ class PhpFileParserFacade
     public function hasClass(ParsedFile $parsedFile): bool
     {
         return $this->service->hasClass($parsedFile);
+    }
+
+    public function getClass(ParsedFile $parsedFile): FileClass
+    {
+        return $this->service->getClass($parsedFile);
+    }
+
+    public function attachDocToClass(ParsedFile $parsedFile, PhpDoc $phpDoc): ParsedFile
+    {
+        return $this->service->attachDocToClass($parsedFile, $phpDoc);
     }
 }

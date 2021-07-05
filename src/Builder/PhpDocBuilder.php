@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Builder;
 
+use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
 use Crusade\PhpLom\Factory\PhpDocFactory;
 use Crusade\PhpLom\ValueObject\GeneratedMethodData;
 use Crusade\PhpLom\ValueObject\PhpDoc;
@@ -28,17 +29,20 @@ class PhpDocBuilder
      */
     public function buildForGeneratedMethods(Collection $methods, Class_ $class): PhpDoc
     {
-        (string)$currentDoc = $class->getDocComment();
-
         $this->start();
+        $this->addAlreadyExistingDoc($class);
 
         $methods
-            ->transform(fn(GeneratedMethodData $data) => $this->docFactory->buildForGeneratedMethod($data))
-            ->each(fn(PhpDoc $doc) => $this->addDoc($doc));
+            ->transform(fn(PropertyData $data) => $this->docFactory->buildForGeneratedMethod($data))
+            ->each(fn(PhpDoc $doc) => $this->addDoc((string)$doc));
 
         $this->end();
 
-        return new PhpDoc($this->doc);
+        $doc = new PhpDoc($this->doc);
+
+        $this->doc = '';
+
+        return $doc;
     }
 
     private function start(): void
@@ -46,7 +50,7 @@ class PhpDocBuilder
         $this->doc = "/** \n";
     }
 
-    private function addDoc(PhpDoc $doc): void
+    private function addDoc(string $doc): void
     {
         $this->doc .= $doc;
     }
@@ -54,5 +58,19 @@ class PhpDocBuilder
     private function end(): void
     {
         $this->doc .= '*/';
+    }
+
+    private function addAlreadyExistingDoc(Class_ $class): void
+    {
+        (string)$currentDoc = $class->getDocComment();
+
+        $phpdocElements = explode("\n", $currentDoc->getText());
+
+        if (count($phpdocElements) >= 3) {
+            array_pop($phpdocElements);
+            foreach ($phpdocElements as $element) {
+                $this->addDoc($element);
+            }
+        }
     }
 }

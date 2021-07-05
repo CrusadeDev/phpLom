@@ -4,39 +4,47 @@ declare(strict_types=1);
 
 namespace Crusade\PhpLom\Factory;
 
+use Crusade\PhpLom\Builder\FunctionNameBuilder;
 use Crusade\PhpLom\Decorator\Annotation\Getter;
 use Crusade\PhpLom\Decorator\Annotation\Setter;
-use Crusade\PhpLom\ValueObject\GeneratedMethodData;
+use Crusade\PhpLom\Decorator\ValueObject\PropertyData;
 use Crusade\PhpLom\ValueObject\PhpDoc;
 
 class PhpDocFactory
 {
-    public function buildForGeneratedMethod(GeneratedMethodData $generatedMethodData): PhpDoc
+    private FunctionNameBuilder $functionNameBuilder;
+
+    public function __construct()
     {
-        if ($generatedMethodData->getPropertyData()->getAnnotation() instanceof Getter) {
-            return $this->getter($generatedMethodData);
+        $this->functionNameBuilder = new FunctionNameBuilder();
+    }
+
+    public function buildForGeneratedMethod(PropertyData $propertyData): PhpDoc
+    {
+        if ($propertyData->getAnnotation() instanceof Getter) {
+            return $this->getter($propertyData);
         }
 
-        if ($generatedMethodData->getPropertyData()->getAnnotation() instanceof Setter) {
-            return $this->setter($generatedMethodData);
+        if ($propertyData->getAnnotation() instanceof Setter) {
+            return $this->setter($propertyData);
         }
 
         throw new \LogicException('Unsupported Annotation');
     }
 
-    private function getter(GeneratedMethodData $generatedMethodData): PhpDoc
+    private function getter(PropertyData $propertyData): PhpDoc
     {
-        $type = $generatedMethodData->getPropertyData()->getPropertyType();
-        $name = $generatedMethodData->getFunctionName();
+        $type = $propertyData->getPropertyType();
+        $name = $this->functionNameBuilder->fromPropertyData($propertyData);
 
         return new PhpDoc(" * @method $type $name()\n  ");
     }
 
-    private function setter(GeneratedMethodData $generatedMethodData): PhpDoc
+    private function setter(PropertyData $propertyData): PhpDoc
     {
-        $type = $generatedMethodData->getPropertyData()->getPropertyType();
-        $propertyName = $generatedMethodData->getPropertyData()->getPropertyName();
-        $name = $generatedMethodData->getFunctionName();
+        $type = $propertyData->getPropertyType();
+        $propertyName = $propertyData->getPropertyName();
+        $name = $this->functionNameBuilder->fromPropertyData($propertyData);
 
 
         return new PhpDoc("* @method void $name($type \$$propertyName)\n  ");

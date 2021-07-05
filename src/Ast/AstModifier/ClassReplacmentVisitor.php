@@ -7,7 +7,7 @@ namespace Crusade\PhpLom\Ast\AstModifier;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
-class ClassModifierVisitor extends NodeVisitorAbstract
+class ClassReplacmentVisitor extends NodeVisitorAbstract
 {
     private Node\Stmt\Class_ $replacementClass;
 
